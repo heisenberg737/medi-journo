@@ -4,6 +4,9 @@ import ReactQuill from 'react-quill';
 import SendIcon from '@mui/icons-material/Send';
 import InfoIcon from '@mui/icons-material/Info';
 import './JournalEntry.css'
+import { addJournalEntry } from '../db.service';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../../firebase-config';
 
 
 interface JournalEntryProps {}
@@ -17,6 +20,8 @@ const JournalEntry: FC<JournalEntryProps> = (props: any) => {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [user, loading, error] = useAuthState(auth);
+  const userId = user?.uid
 
   const modules = {
     // Quill modules configuration
@@ -52,6 +57,15 @@ const JournalEntry: FC<JournalEntryProps> = (props: any) => {
     const readingTime = Math.ceil(wordCount / averageWPM);
 
     return readingTime;
+  };
+
+
+  const handleSubmit = async () => {
+    await addJournalEntry(title, value, tags, entryDate, userId);
+    setTitle('');
+    setValue('');
+    setTags([]);
+    setEntryDate(new Date());
   };
 
   const open = Boolean(anchorEl);
@@ -119,7 +133,7 @@ const JournalEntry: FC<JournalEntryProps> = (props: any) => {
           <InfoIcon />
         </Button>
       <Button 
-        onClick={() => console.log('Journal submitted', { title, value, tags })}
+        onClick={() => handleSubmit()}
         endIcon={<SendIcon />} 
         variant='contained' 
         color="primary"
