@@ -12,6 +12,7 @@ import HomePage from './components/HomePage/HomePage';
 import MainLayout from './components/MainLayout/MainLayout';
 import MeditationSession from './components/MeditationSession/MeditationSession';
 import JournalEntry from './components/JournalEntry/JournalEntry';
+import JournalList from './components/JournalList/JournalList';
 
 function App() {
 
@@ -53,7 +54,9 @@ function App() {
                   <Route index element={<HomePage />} />
                   <Route path="support" element={<SupportPage />} />
                   <Route path='meditate' element={<MeditationSession />}></Route>
-                  <Route path='journal' element={<JournalEntry />}></Route>
+                  <Route path='journal' element={<JournalList />}></Route>
+                  <Route path='journal/new' element={<JournalEntry />}></Route>
+                  <Route path='journal/:id' element={<JournalEntry />}></Route>
                 </Route>
                 <Route path="*" element={<Navigate to={user ? "/" : "/login"} replace />} />
             </Routes>
