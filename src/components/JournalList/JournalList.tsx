@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../firebase-config';
 import { fetchJournalEntries } from '../db.service';
+import DOMPurify from 'dompurify';
 
 
 interface JournalListProps {
@@ -22,6 +23,7 @@ const JournalList: FC<JournalListProps> = () => {
     const loadEntries = async () => {
       if (user) {
         const entries = await fetchJournalEntries(user.uid);
+        entries.sort((a: any, b: any) => b.updatedAt.seconds - a.updatedAt.seconds);
         setJournalEntries(entries);
         setLoading(false);
       }
@@ -45,7 +47,10 @@ const JournalList: FC<JournalListProps> = () => {
                 <Paper key={entry.id} elevation={1} sx={{ p: 2, mb: 2 }}>
                   <Typography variant="h6">{entry.title}</Typography>
                   <Typography variant="body2">{new Date(entry.createdAt.seconds * 1000).toLocaleString()}</Typography>
-                  <Typography variant="body1">{entry.content.slice(0, 100)}...</Typography>
+                  <Typography 
+                    variant="body1"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(entry.content.slice(0, 100) + '...') }} 
+                  />
                   <Button variant="text" onClick={() => navigate(`/journal/${entry.id}`)}>Read More</Button>
                 </Paper>
               ))}

@@ -56,7 +56,7 @@ function App() {
                   <Route path='meditate' element={<MeditationSession />}></Route>
                   <Route path='journal' element={<JournalList />}></Route>
                   <Route path='journal/new' element={<JournalEntry />}></Route>
-                  <Route path='journal/:id' element={<JournalEntry />}></Route>
+                  <Route path='journal/:journalId' element={<JournalEntry />}></Route>
                 </Route>
                 <Route path="*" element={<Navigate to={user ? "/" : "/login"} replace />} />
             </Routes>

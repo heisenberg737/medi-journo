@@ -1,12 +1,13 @@
 import { Box, Button, Paper, TextField, TextareaAutosize, useMediaQuery, useTheme, Chip, Tooltip, Popover, Typography } from '@mui/material';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import ReactQuill from 'react-quill';
 import SendIcon from '@mui/icons-material/Send';
 import InfoIcon from '@mui/icons-material/Info';
 import './JournalEntry.css'
-import { addJournalEntry } from '../db.service';
+import { addJournalEntry, fetchJournalEntryById, updateJournalEntry } from '../db.service';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../firebase-config';
+import { useParams } from 'react-router-dom';
 
 
 interface JournalEntryProps {}
@@ -15,28 +16,57 @@ const JournalEntry: FC<JournalEntryProps> = (props: any) => {
 
 
   const [value, setValue] = useState('');
-  const [title, setTitle] = useState('');
+  // const [title, setTitle] = useState('');
   const [entryDate, setEntryDate] = useState<Date | null>(new Date());
-  const [tags, setTags] = useState<string[]>([]);
+  // const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [user, loading, error] = useAuthState(auth);
   const userId = user?.uid
+  const { journalId } = useParams<{ journalId: string }>();
+  const [entry, setEntry] = useState<any>({content: "", title: "", tags: [], userId: userId, createdAt: new Date()});
+  const [loadingBar, setLoading] = useState(true);
 
   const modules = {
     // Quill modules configuration
   };
 
   const handleAddTag = () => {
-    if (tagInput && tags.length < 5) {
-      setTags([...tags, tagInput]);
+    if (tagInput && entry.tags.length < 5) {
+      entry.tags = [...entry.tags, tagInput];
+      setEntry(entry)
       setTagInput('');
     }
   };
 
+  
+
+
+
+  useEffect(() => {
+    const loadEntry = async () => {
+      if (journalId && journalId!=undefined) {
+        const entryData = await fetchJournalEntryById(journalId);
+        setEntry(entryData);
+        // setTags(entryData!.tags)
+        // setTitle(entryData!.title)
+        setValue(entryData!.content)
+        // setEntryDate(entryData!.entryDate)
+        setLoading(false);
+      }
+    };
+    loadEntry();
+  }, [journalId]);
+
+  useEffect(() => {
+      entry.content = value;
+      setEntry(entry)
+  }, [value])
+
   const handleDeleteTag = (index: number) => {
-    const updatedTags = tags.filter((_, i) => i !== index);
-    setTags(updatedTags);
+    const updatedTags = entry.tags.filter((_: any, i: any) => i !== index);
+    entry.tags = updatedTags;
+    setEntry(entry)
   };
   const handleStatisticsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -61,12 +91,30 @@ const JournalEntry: FC<JournalEntryProps> = (props: any) => {
 
 
   const handleSubmit = async () => {
-    await addJournalEntry(title, value, tags, entryDate, userId);
-    setTitle('');
-    setValue('');
-    setTags([]);
-    setEntryDate(new Date());
+    if(journalId == null || journalId == undefined)
+    {
+        await addJournalEntry(entry)
+        setValue("")
+        setEntry({content: "", title: "", tags: [], userId: userId, createdAt: new Date(), updatedAt: new Date()})
+    }
+
+    else 
+    {
+      await updateJournalEntry(journalId, entry)
+    }
+
+
   };
+
+  const updateJournalData = (event: any, field: string) => {
+    console.log("Here!")
+    entry[field] = event.target.value
+    setEntry((prevEntry: any) => ({
+      ...prevEntry,
+      [field]: event.target.value,
+    }))
+    console.log(entry)
+  }
 
   const open = Boolean(anchorEl);
   const id = open ? 'statistics-popover' : undefined;
@@ -76,20 +124,20 @@ const JournalEntry: FC<JournalEntryProps> = (props: any) => {
     <Paper elevation={3} sx={{ p: 2, flex: 1, overflow: 'auto', position: 'relative' }}>
        {/* Journal Title */}
       <Typography variant="h4" gutterBottom>
-        {title}
+        {entry.title}
       </Typography>
       <TextField
         fullWidth
         variant="outlined"
         placeholder="Enter a title"
         label="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        value={entry.title}
+        onChange={(e) => updateJournalData(e, "title")}
         margin="normal"
       />
       <Box sx={{ position: 'absolute', left: 0, right: 0, top: 'calc(100% + 10px)', zIndex: 1 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-          {tags.map((tag, index) => (
+          {entry.tags.map((tag: any, index: any) => (
             <Chip
               key={index}
               label={tag}
