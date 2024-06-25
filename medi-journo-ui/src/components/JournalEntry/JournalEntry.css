@@ -1,0 +1,41 @@
+.journalContainer
+{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.journalContainer > * {
+    width: 100%;
+}
+
+/* .custom-quill{
+    .ql-container {
+        height: auto;
+        min-height: 200px;
+        margin: 10px;
+    }
+
+    .ql-editor {
+        min-height: 180px;
+        height: auto;
+        overflow-y: hidden;
+        max-height: none;
+    }
+
+    .ql-toolbar {
+        margin: 10px;
+    }
+} */
+
+/* Dark mode styles for Quill when using the 'snow' theme */
+.dark-mode .ql-snow {
+    background-color: #333;
+    color: #ccc;
+  }
+  
+  .dark-mode .ql-snow .ql-editor {
+    background-color: #2c2c2c;
+    color: white;
+  }
+  
