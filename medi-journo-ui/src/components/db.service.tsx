@@ -62,4 +62,23 @@ const addJournalEntry = async (entry: any) => {
     await deleteDoc(doc(db, 'journalEntries', id));
   };
 
-export {deleteJournalEntry, fetchJournalEntries, addJournalEntry, updateJournalEntry, fetchJournalEntryById}
+  const fetchHFAPIKey = async() => {
+    try {
+      const docRef = doc(db, 'config', 'GDAILQOeMltb2U5fx1Lo');
+      const docSnap = await getDoc(docRef);
+  
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const apiKey = data.huggingFaceKey;
+        console.log('API Key:', apiKey);
+        return apiKey;
+      } else {
+        console.log('No such document!');
+      }
+    } catch (error) {
+      console.error('Error fetching API key:', error);
+    }
+    return "";
+}
+
+export {deleteJournalEntry, fetchJournalEntries, addJournalEntry, updateJournalEntry, fetchJournalEntryById, fetchHFAPIKey}
