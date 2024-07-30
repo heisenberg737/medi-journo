@@ -3,7 +3,6 @@ import { fetchHFAPIKey } from '../components/db.service';
 
 const hfApiKey = await fetchHFAPIKey()
 
-// const hf = new HfInference('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'); // Replace with your actual API key
 const hf = new HfInference(hfApiKey)
 
 export const extractEntities = async (text: string) => {
